@@ -6,9 +6,9 @@
 :root {
     --bg-color: #2f005e; 
     --main-node-bg: #ffffff;
-    --main-node-text: #000087;
+    --main-node-text: #2f005e;
     --sub-node-bg: rgba(255, 255, 255, 0.95);
-    --sub-node-text: #000087;
+    --sub-node-text: #2f005e;
     --leaf-node-bg: #ffffff;
     --leaf-node-text: #000000;
     --studio-border: 2px solid #ffffff;
@@ -94,7 +94,7 @@ body, html {
 
 .panel-btn:hover {
     background: #ffffff;
-    color: #000087;
+    color: #2f005e;
     transform: translateY(-2px);
 }
 
@@ -130,7 +130,7 @@ body, html {
 
 .btn:hover {
     background: #ffffff;
-    color: #000087;
+    color: #2f005e;
     transform: scale(1.05);
 }
 
