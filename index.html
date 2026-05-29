@@ -461,6 +461,30 @@
             { from: 'n_rahmen', to: 'n_entfaltung', type: 'sub-leaf' }
         ];
 
+        // NEU: Hilfsfunktion zur Begrenzung der Verschiebung auf die Canvas-Größe
+        function clampTransform() {
+            const vpRect = viewport.getBoundingClientRect();
+            
+            // Berechne die maximalen Ränder basierend auf der Canvas-Größe (6000x4500) und dem Zoom
+            const minX = vpRect.width - (6000 * transform.scale);
+            const minY = vpRect.height - (4500 * transform.scale);
+            const maxX = 0;
+            const maxY = 0;
+
+            // Falls das Canvas kleiner als der Bildschirm ist, in der Mitte zentrieren
+            if (minX > maxX) {
+                transform.x = (vpRect.width - (6000 * transform.scale)) / 2;
+            } else {
+                transform.x = Math.max(minX, Math.min(maxX, transform.x));
+            }
+
+            if (minY > maxY) {
+                transform.y = (vpRect.height - (4500 * transform.scale)) / 2;
+            } else {
+                transform.y = Math.max(minY, Math.min(maxY, transform.y));
+            }
+        }
+
         function initWorkspace() {
             const vpRect = viewport.getBoundingClientRect();
             // Automatische Zentrierung direkt auf den Hauptknoten (2600px / 2150px) bei maximalem Zoom
@@ -503,6 +527,8 @@
         }
 
         function updateTransform() {
+            // Begrenzung anwenden, bevor das Canvas verschoben wird
+            clampTransform();
             canvas.style.transform = `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0) scale(${transform.scale})`;
             document.body.style.backgroundPosition = `${Math.round(transform.x)}px ${Math.round(transform.y)}px`;
         }
@@ -552,7 +578,7 @@
         document.getElementById('zoom-out').addEventListener('click', () => zoomAround(0.85, window.innerWidth/2, window.innerHeight/2));
         document.getElementById('zoom-reset').addEventListener('click', () => {
             const rect = viewport.getBoundingClientRect();
-            // Reset setzt nun ebenfalls auf den zentrierten, gestochen scharfen Maximalzoom zurück
+            // Reset setzt ebenfalls wieder auf den zentrierten Maximalzoom zurück
             transform = { scale: maxScale, x: rect.width / 2 - 2600 * maxScale, y: rect.height / 2 - 2150 * maxScale };
             updateTransform();
         });
