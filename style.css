@@ -111,7 +111,7 @@ body, html {
 }
 
 .btn {
-    background: rgba(0, 0, 135, 0.6);
+    background: rgba(47, 0, 94, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #ffffff;
