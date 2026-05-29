@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)file:///D:/Downloads/gemini-code-1780086497272.html -->
+<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Religiöses Lernen in einer Kultur der Digitalität - Präsentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./Religiöses Lernen in einer Kultur der Digitalität - Mindmap_files/css2" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #000087; 
+            --main-node-bg: #ffffff;
+            --main-node-text: #000087;
+            --sub-node-bg: rgba(255, 255, 255, 0.95);
+            --sub-node-text: #000087;
+            --leaf-node-bg: #ffffff;
+            --leaf-node-text: #000000;
+            --studio-border: 2px solid #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px);
+            background-size: 30px 30px;
+            color: #ffffff;
+        }
+
+        /* UI-Panel links oben */
+        .ui-panel {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: rgba(0, 0, 131, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 24px;
+            z-index: 10;
+            border: var(--studio-border);
+            border-radius: 0px 0px 40px 0px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            max-width: 320px;
+        }
+
+        .ui-panel h1 {
+            font-size: 1.35rem;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .ui-panel p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .panel-btn {
+            background: transparent;
+            color: #ffffff;
+            border: var(--studio-border);
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .panel-btn:hover {
+            background: #ffffff;
+            color: #000087;
+            transform: translateY(-2px);
+        }
+
+        /* Zoom-Controls unten rechts */
+        .controls {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .btn {
+            background: rgba(0, 0, 135, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #ffffff;
+            border: var(--studio-border);
+            width: 44px;
+            height: 44px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #ffffff;
+            color: #000087;
+            transform: scale(1.05);
+        }
+
+        /* Canvas-Workspace */
+        .viewport {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            position: relative;
+            touch-action: none;
+        }
+
+        .viewport:active {
+            cursor: grabbing;
+        }
+
+        .canvas {
+            width: 6000px;
+            height: 4500px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+            
+            /* Verhindert Unschärfe: Erzwingt echtes Vektor-Repainting */
+            transform-style: flat;
+            -webkit-transform-style: flat;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .lines-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .line {
+            fill: none;
+            stroke: #ffffff;
+            opacity: 0.5;
+        }
+
+        .line-main-sub { stroke-width: 3.5px; }
+        .line-sub-leaf { stroke-width: 1.5px; stroke-dasharray: 4 4; }
+
+        /* Strukturierte Knoten (Feste Größenverhältnisse garantiert) */
+        .node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+            padding: 18px 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            transform: translate(-50%, -50%);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .node-main {
+            background: var(--main-node-bg);
+            color: var(--main-node-text);
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.3;
+            border-radius: 45px 0px 0px 0px; 
+            padding: 28px 36px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), 0 20px 50px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+
+        .node-sub {
+            background: var(--sub-node-bg);
+            color: var(--sub-node-text);
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 0px 20px 0px 0px;
+            padding: 14px 20px;
+            z-index: 4;
+        }
+
+        .node-leaf {
+            background: var(--leaf-node-bg);
+            color: var(--leaf-node-text);
+            font-size: 0.82rem;
+            font-weight: 400;
+            line-height: 1.45;
+            border-radius: 6px;
+            padding: 16px 20px;
+            z-index: 3;
+        }
+
+        /* Freigegebener Textinhalt für Copy & Paste */
+        .node-content {
+            width: 100%;
+            cursor: text;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
+        .node-content h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #000000;
+        }
+
+        .node-content ul {
+            padding-left: 14px;
+            margin-top: 4px;
+            list-style-type: disc;
+        }
+
+        .node-content li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body style="background-position: -968px -644px;">
+
+    <div class="ui-panel">
+        <h1>Religiöses Lernen in einer Kultur der Digitalität</h1>
+        <p>Mindmap zum Begriff des Erzählens</p>
+        <div class="action-btns">
+            <button class="panel-btn" id="btn-fullscreen">🖥️ Vollbildmodus</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="zoom-in">+</button>
+        <button class="btn" id="zoom-out">−</button>
+        <button class="btn" id="zoom-reset">⟲</button>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <div class="canvas" id="canvas" style="transform: translate3d(-968px, -644px, 0px) scale(0.637539);">
+            <svg class="lines-svg" id="lines-svg"><path id="path-n_main-n_dim" class="line line-main-sub" d="M 2600 2150 C 2350 2150, 2350 1920, 2100 1920"></path><path id="path-n_dim-n_dim1" class="line line-sub-leaf" d="M 2100 1920 C 2100 1920, 2100 2120, 2100 2120"></path><path id="path-n_dim-n_dim2" class="line line-sub-leaf" d="M 2100 1920 C 2100 1920, 2100 2340, 2100 2340"></path><path id="path-n_dim-n_dim3" class="line line-sub-leaf" d="M 2100 1920 C 2100 1920, 2100 2560, 2100 2560"></path><path id="path-n_dim2-n_erinnerung" class="line line-sub-leaf" d="M 2100 2340 C 1890 2340, 1890 2340, 1680 2340"></path><path id="path-n_main-n_schrift" class="line line-main-sub" d="M 2600 2150 C 2875 2150, 2875 1920, 3150 1920"></path><path id="path-n_schrift-n_judentum" class="line line-sub-leaf" d="M 3150 1920 C 3375 1920, 3375 1800, 3600 1800"></path><path id="path-n_schrift-n_christentum" class="line line-sub-leaf" d="M 3150 1920 C 3375 1920, 3375 2040, 3600 2040"></path><path id="path-n_main-n_didaktik" class="line line-main-sub" d="M 2600 2150 C 2875 2150, 2875 2380, 3150 2380"></path><path id="path-n_christentum-n_facetten" class="line line-sub-leaf" d="M 3600 2040 C 3860 2040, 3860 1800, 4120 1800"></path><path id="path-n_facetten-n_bedeutung" class="line line-sub-leaf" d="M 4120 1800 C 4120 1800, 4120 2010, 4120 2010"></path><path id="path-n_bedeutung-n_genese" class="line line-sub-leaf" d="M 4120 2010 C 4120 2010, 4120 2230, 4120 2230"></path><path id="path-n_genese-n_verhaeltnis" class="line line-sub-leaf" d="M 4120 2230 C 4120 2230, 4120 2490, 4120 2490"></path><path id="path-n_facetten-n_techniken" class="line line-sub-leaf" d="M 4120 1800 C 4335 1800, 4335 1920, 4550 1920"></path><path id="path-n_techniken-n_rahmen" class="line line-sub-leaf" d="M 4550 1920 C 4550 1920, 4550 2200, 4550 2200"></path><path id="path-n_rahmen-n_entfaltung" class="line line-sub-leaf" d="M 4550 2200 C 4550 2200, 4550 2460, 4550 2460"></path></svg>
+            
+            <div class="node node-main" id="n_main" style="left:2600px; top:2150px; width:380px;">
+                <div class="node-content">
+                    <span style="font-size:1.5rem; font-weight:900; letter-spacing: -0.8px;">Erzählen</span><br>
+                    <span style="font-size:1.0rem; font-weight:700; color:#000087;">Kultur der Digitalität - Aufgabe vom 28.05.26</span>
+                    <div style="margin-top:16px; font-size:0.8rem; font-weight:500; color:#222; line-height:1.4;">
+                        <b style="color:#000087;">Grundlage:</b><br>
+                        Baldermann, Ingo, Erzählen, in: Mette, Norbert / Rickers, Folkert (Hrsg.), Lexikon der Religionspädagogik (LexRP) - Studienausgabe, Bd. 1, Neukirchen-Vluyn 2001, pp. 435-441.
+                    </div>
+                </div>
+            </div>
+
+            <div class="node node-sub" id="n_dim" style="left:2100px; top:1920px; width:150px; text-align:center;">
+                <div class="node-content">Dimensionen</div>
+            </div>
+
+            <div class="node node-leaf" id="n_dim1" style="left:2100px; top:2120px; width:330px;">
+                <div class="node-content">
+                    <h4>Kommunikation</h4>
+                    <ul>
+                        <li>Mitteilen von Informationen und Erfahrungen</li>
+                        <li>Sprachliche Äußerungen</li>
+                        <li>Erklärende Funktion - Zusammenhänge illustrieren</li>
+                        <li><b>⇒ Roter Faden in der Struktur der Äußerungen</b> ist die erzählende Komponente in ebendiesen, welche Zusammenhänge sichtbar macht</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_dim2" style="left:2100px; top:2340px; width:330px;">
+                <div class="node-content">
+                    <h4>Soziale Struktur</h4>
+                    <ul>
+                        <li>gemeinsame Bewältigung</li>
+                        <li>kollektives Gedächtnis = Tradierung - Erinnerungskultur</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_dim3" style="left:2100px; top:2560px; width:330px;">
+                <div class="node-content">
+                    <h4>Stilisierung</h4>
+                    <ul>
+                        <li>Inhalt kann in einer bestimmten Weise präsentiert werden unter Verwendung verschiedener Mittel. Gefahr hierbei: der Bezug zu Tatsache/Sachverhalt/Fakt kann verschleiert und aufgeweicht werden oder gar abhanden kommen (Bsp. Narrative der NS-Zeit)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_erinnerung" style="left:1680px; top:2340px; width:220px;">
+                <div class="node-content">
+                    <b>Stichwort: Erinnerungskultur</b><br><br>
+                    Sie ist essentiell wichtig für das Christentum als anamnetische Religion. Die Gegenwärtigsetzung in der Eucharistiefeier beispielsweise lebt durch die Erzählungen, die zugleich präsent gesetzt werden.
+                </div>
+            </div>
+
+            <div class="node node-sub" id="n_schrift" style="left:3150px; top:1920px; width:240px; text-align:center;">
+                <div class="node-content">Erzählen in heiliger Schrift</div>
+            </div>
+
+            <div class="node node-leaf" id="n_judentum" style="left:3600px; top:1800px; width:270px;">
+                <div class="node-content">
+                    <b>Judentum</b><br><br>
+                    Einbindung in rituelle Festlichkeiten vgl. Haggada des Pessachs (gesammelte Erzählungen aus der rabbinischen Auslegungstradition)
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_christentum" style="left:3600px; top:2040px; width:290px;">
+                <div class="node-content">
+                    <b>Christentum</b>
+                    <ul>
+                        <li>Evangelien sind Jesus-Stories, sie zeichnen sein Leben in einer teleologischen Weise; Kern der Erzählungen ist die Passionsgeschichte</li>
+                        <li>Der Wortlaut der Erzählung ist an sich keine Offenbarungswahrheit; fundiert durch die historisch-kritische Exegese wurde auf dem 2. Vaticanum festgehalten, die Bibel sei Gottes Wort in Menschenwort.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_didaktik" style="left:3150px; top:2380px; width:380px; color:#000087; background:rgba(255,255,255,0.95); border:2px solid #000087;">
+                <div class="node-content">
+                    <b style="font-size:0.85rem;">Religionsdidaktische Funktion</b>
+                    <ul style="margin-top:6px;">
+                        <li><b>Vergegenwärtigung alter, aber bedeutender Texte</b></li>
+                        <li><b>Anregen der Rezeption des Textmaterials</b></li>
+                        <li><b>"Selbstständige Wahrnehmung" (vgl. Nadolny), ergo eigene Urteilsbildung zum Erzählten hervorrufen</b></li>
+                        <li><b>⇒ Methode = Lücken lassen in der Erzählung, um Überlegungen der Rezeptierenden anzuregen</b></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_facetten" style="left:4120px; top:1800px; width:240px; text-align:center; font-weight:bold; border: 1.5px solid #000087;">
+                <div class="node-content">Facetten in biblischen Narrativen</div>
+            </div>
+
+            <div class="node node-leaf" id="n_bedeutung" style="left:4120px; top:2010px; width:240px;">
+                <div class="node-content">
+                    <b>Bedeutung für</b>
+                    <ul>
+                        <li>Glauben</li>
+                        <li>Theologie</li>
+                        <li>Glaubensgemeinschaft</li>
+                        <li>⇒ Die Ausrichtung nach dem richtigen Leben folgt maßgeblich den Erzählungen der Bibel</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_genese" style="left:4120px; top:2230px; width:240px;">
+                <div class="node-content">
+                    <b>Genese durch</b>
+                    <ul>
+                        <li>Soziokulturelles Umfeld</li>
+                        <li>außerbiblische Einflüsse (parallele außerkanonische Texte)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_verhaeltnis" style="left:4120px; top:2490px; width:250px;">
+                <div class="node-content">
+                    Verhältnis von <b>erzählerischer Ausgestaltung</b> zu <b>historischem Kern</b> des Glaubensinhalts (<span style="color:#000087">These Neidhart</span>)
+                    <ul style="margin-top:6px;">
+                        <li>Im Hintergrund steht die theologische Aussage</li>
+                        <li>In der Wahl der Erzählmittel divergieren die Narrative (z. B. vermehrter Einsatz von Gleichnissen ggü. inszenierten Dialogen)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_techniken" style="left:4550px; top:1920px; width:260px;">
+                <div class="node-content">
+                    <b>Narrative Techniken in der Bibel</b>
+                    <ul style="margin-top: 6px;">
+                        <li>Rahmenerzählungen, die Kontext liefern und Bedeutung tragen, ergeben Einsichten über die Umwelt des Textes (vgl. <span style="color:#000087">Neidhart</span>)</li>
+                        <li>Entfaltung, verstanden als Auskleiden des Geschehenen, im erklärenden Wiedergeben (vgl. <span style="color:#000087">Steinwede</span>).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_rahmen" style="left:4550px; top:2200px; width:260px;">
+                <div class="node-content">
+                    <b>Rahmenerzählungen</b>
+                    <ul style="margin-top: 4px;">
+                        <li>Stellen einen Bezug her</li>
+                        <li>Können als Zugang fungieren gemäß der hist.-krit. Exegese</li>
+                    </ul>
+                    <div style="margin-top:6px;">⇒ Problem: vorgenommene Unterstellung einer "Aussageabsicht" des Textes ist strittig; Texte wären insoweit unauthentischer</div>
+                </div>
+            </div>
+
+            <div class="node node-leaf" id="n_entfaltung" style="left:4550px; top:2460px; width:260px;">
+                <div class="node-content">
+                    <b>Entfaltung</b>
+                    <ul>
+                        <li>"sachliche Entfaltung" setzt Kontext und informativen</li>
+                        <li>"sprachliche Entfaltung" zielt auf Wirkung und Rezeptionsmöglichkeiten ab</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const viewport = document.getElementById('viewport');
+        const canvas = document.getElementById('canvas');
+        const svgCanvas = document.getElementById('lines-svg');
+
+        // Geänderter Startwert: Direkt maximaler, hochauflösender Zoom
+        const maxScale = 1.3;
+        const minScale = 0.4;
+        let transform = { scale: maxScale, x: 0, y: 0 };
+        let isDraggingCanvas = false;
+        let startX = 0, startY = 0;
+
+        const nodeConnections = [
+            { from: 'n_main', to: 'n_dim', type: 'main-sub' },
+            { from: 'n_dim', to: 'n_dim1', type: 'sub-leaf' },
+            { from: 'n_dim', to: 'n_dim2', type: 'sub-leaf' },
+            { from: 'n_dim', to: 'n_dim3', type: 'sub-leaf' },
+            { from: 'n_dim2', to: 'n_erinnerung', type: 'sub-leaf' },
+            { from: 'n_main', to: 'n_schrift', type: 'main-sub' },
+            { from: 'n_schrift', to: 'n_judentum', type: 'sub-leaf' },
+            { from: 'n_schrift', to: 'n_christentum', type: 'sub-leaf' },
+            { from: 'n_main', to: 'n_didaktik', type: 'main-sub' },
+            { from: 'n_christentum', to: 'n_facetten', type: 'sub-leaf' },
+            { from: 'n_facetten', to: 'n_bedeutung', type: 'sub-leaf' },
+            { from: 'n_bedeutung', to: 'n_genese', type: 'sub-leaf' },
+            { from: 'n_genese', to: 'n_verhaeltnis', type: 'sub-leaf' },
+            { from: 'n_facetten', to: 'n_techniken', type: 'sub-leaf' },
+            { from: 'n_techniken', to: 'n_rahmen', type: 'sub-leaf' },
+            { from: 'n_rahmen', to: 'n_entfaltung', type: 'sub-leaf' }
+        ];
+
+        function initWorkspace() {
+            const vpRect = viewport.getBoundingClientRect();
+            // Automatische Zentrierung direkt auf den Hauptknoten (2600px / 2150px) bei maximalem Zoom
+            transform.x = Math.round(vpRect.width / 2 - 2600 * transform.scale);
+            transform.y = Math.round(vpRect.height / 2 - 2150 * transform.scale);
+            
+            updateTransform();
+            buildSVGPaths();
+            drawConnections();
+        }
+
+        function buildSVGPaths() {
+            svgCanvas.innerHTML = '';
+            nodeConnections.forEach(conn => {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('id', `path-${conn.from}-${conn.to}`);
+                path.setAttribute('class', `line ${conn.type === 'main-sub' ? 'line-main-sub' : 'line-sub-leaf'}`);
+                svgCanvas.appendChild(path);
+            });
+        }
+
+        function drawConnections() {
+            nodeConnections.forEach(conn => {
+                const fromEl = document.getElementById(conn.from);
+                const toEl = document.getElementById(conn.to);
+                const path = document.getElementById(`path-${conn.from}-${conn.to}`);
+                
+                if (!fromEl || !toEl || !path) return;
+
+                const x1 = fromEl.offsetLeft; const y1 = fromEl.offsetTop;
+                const x2 = toEl.offsetLeft; const y2 = toEl.offsetTop;
+
+                const controlX1 = x1 + (x2 - x1) * 0.5;
+                const controlY1 = y1;
+                const controlX2 = x1 + (x2 - x1) * 0.5;
+                const controlY2 = y2;
+
+                path.setAttribute('d', `M ${x1} ${y1} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x2} ${y2}`);
+            });
+        }
+
+        function updateTransform() {
+            canvas.style.transform = `translate3d(${Math.round(transform.x)}px, ${Math.round(transform.y)}px, 0) scale(${transform.scale})`;
+            document.body.style.backgroundPosition = `${Math.round(transform.x)}px ${Math.round(transform.y)}px`;
+        }
+
+        function zoomAround(scaleFactor, clientX, clientY) {
+            const oldScale = transform.scale;
+            let newScale = Math.max(minScale, Math.min(maxScale, oldScale * scaleFactor));
+            
+            if (newScale === oldScale) return;
+
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = clientX - rect.left;
+            const mouseY = clientY - rect.top;
+
+            transform.x = mouseX - (mouseX - transform.x) * (newScale / oldScale);
+            transform.y = mouseY - (mouseY - transform.y) * (newScale / oldScale);
+            transform.scale = newScale;
+            
+            updateTransform();
+        }
+
+        viewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoomAround(e.deltaY < 0 ? 1.06 : 0.94, e.clientX, e.clientY);
+        }, { passive: false });
+
+        viewport.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.node-content')) return;
+            if (e.target.closest('.panel-btn') || e.target.closest('.btn')) return;
+
+            isDraggingCanvas = true;
+            startX = e.clientX - transform.x;
+            startY = e.clientY - transform.y;
+            viewport.setPointerCapture(e.pointerId);
+        });
+
+        viewport.addEventListener('pointermove', (e) => {
+            if (!isDraggingCanvas) return;
+            transform.x = e.clientX - startX;
+            transform.y = e.clientY - startY;
+            updateTransform();
+        });
+
+        viewport.addEventListener('pointerup', () => { isDraggingCanvas = false; });
+
+        document.getElementById('zoom-in').addEventListener('click', () => zoomAround(1.15, window.innerWidth/2, window.innerHeight/2));
+        document.getElementById('zoom-out').addEventListener('click', () => zoomAround(0.85, window.innerWidth/2, window.innerHeight/2));
+        document.getElementById('zoom-reset').addEventListener('click', () => {
+            const rect = viewport.getBoundingClientRect();
+            // Reset setzt nun ebenfalls auf den zentrierten, gestochen scharfen Maximalzoom zurück
+            transform = { scale: maxScale, x: rect.width / 2 - 2600 * maxScale, y: rect.height / 2 - 2150 * maxScale };
+            updateTransform();
+        });
+
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        });
+
+        window.addEventListener('resize', drawConnections);
+        window.addEventListener('DOMContentLoaded', initWorkspace);
+    </script>
+
+
+</body></html>
